@@ -1,4 +1,4 @@
-## Preprocessing Steps ##
+## Preprocessing ##
 
 * Convert `review.json` to csv
 
@@ -14,7 +14,7 @@
     - for each piece of review text in `yelp_review_cleaned.csv`, we extract `business_id`
     to match it with `city` and `state` from the business data
     - costruct a new csv file with columns `business_id`, `text`, `city`, `state`
-    - group cities/states into a bigger region (e.g. Southwest, Northeast)
+    - group cities/states into more general regions (e.g. Southwest, Northeast)
     - Add a new column to our csv file: `region`
 
 ## Counting Frequencies ##

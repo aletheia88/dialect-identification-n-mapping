@@ -45,6 +45,200 @@ word_clusters = [
     ["modals"],
 ]
 
+label_key = {
+    "mischievous" : "mischievous",
+    "mischievious" : "mischievious",
+    "realtor(s)?" : "realtor",
+    "estate agent(s)?" : "estate agent",
+    "spigot(s)?" : "spigot",
+    "spicket(s)?" : "spicket",
+    "dragged" : "dragged",
+    "drug" : "drug",
+    "you all" : "you all",
+    "(yous)|(youse)" : "yous",
+    "yins" : "yins",
+    "you lot" : "you lot",
+    "you guys" : "you guys",
+    "you uns" : "you uns",
+    "y all" : "y'all",
+    "tag sale(s)?" : "tag sale",
+    "yard sale(s)?" : "yard sale",
+    "garage sale(s)?" : "garage sale",
+    "rummage sale(s)?" : "rummage sale",
+    "thrift sale(s)?" : "thrift sale",
+    "stoop sale(s)?" : "stoop sale",
+    "car port sale(s)?" : "carport sale",
+    "side walk sale(s)?" : "sidewalk sale",
+    "jumble sale(s)?" : "jumble sale",
+    "car boot sale(s)?" : "carboot sale",
+    "patio sale(s)?" : "patio sale",
+    "mumblety peg(s)?" : "mublety-peg",
+    "mumbledy peg(s)?" : "mumbledy-peg",
+    "mumbly peg(s)?" : "mumbly-peg",
+    "mumblely peg(s)?" : "mumblely-peg",
+    "mumble peg(s)?" : "muble-peg",
+    "mummety peg(s)?" : "mummety-peg",
+    "numblety peg(s)?" : "numblety-peg",
+    "base ball jack knife" : "baseball jackknife",
+    "stick knife" : "stickknife",
+    "stick frog(s)?" : "stick frog",
+    "stretch" : "stretch",
+    "knifey" : "knifey",
+    "splits" : "splits",
+    "sub(s)?" : "sub",
+    "grinder(s)?" : "grinder",
+    "hoagie(s)?" : "hoagie",
+    "po[or]? boy(s)?" : "poor boy",
+    "Italian sandwich(es)?" : "Italian sandwich",
+    "sarney(s)?" : "sarney",
+    "fire fl(y|ies)" : "firefly",
+    "lightning bug(s)?" : "lightning bug",
+    "craw fish(es)?" : "crawfish",
+    "cray fish(es)?" : "crayfish",
+    "craw dad(s)?" : "crawdad",
+    "daddy long leg(s)?" : "daddy long legs",
+    "daddy big leg(s)?" : "daddy big legs",
+    "daddy bug(s)?" : "daddy bug",
+    "father long leg(s)?" : "father long legs",
+    "daddy gray beard(s)?" : "daddy greybeards",
+    "harvest man" : "harvestman",
+    "moskeet spider(s)?" : "moskeet spider",
+    "grand mother(s)?" : "grandmother",
+    "granny(s)?" : "granny",
+    "grandma(s)?" : "grandma",
+    "nana(s)?" : "nana",
+    "gramm[y|i](s)?" : "grammy",
+    "gramma(s)?" : "gramma",
+    "gramps" : "gramps",
+    "grandpa(s)?" : "grandpa",
+    "grampa(s)?" : "grampa",
+    "grand[d]?ad(s)?" : "granddad",
+    "pap(s)?" : "pap",
+    "dust bunnies" : "dust bunnies",
+    "dust kittens" : "dust kittens",
+    "dust mice" : "dust mice",
+    "dust balls" : "dustballs",
+    "sneaker(s)?" : "sneakers",
+    "gym shoe(s)?" : "gym shoes",
+    "sand shoe(s)?" : "sand shoes",
+    "jumper(s)?" : "jumpers",
+    "tennis shoe(s)?" : "tennis shoes",
+    "running shoe(s)?" : "running shoes",
+    "pill bug(s)?" : "pill bug",
+    "doodle bug(s)?" : "doodle bug",
+    "potato bug(s)?" : "potato bug",
+    "roly pol[y|ies]" : "roly poly",
+    "sow bug(s)?" : "sow bug",
+    "basket ball bug(s)?" : "basketball bug",
+    "twiddle bug(s)?" : "twiddle bug",
+    "roll up bug(s)?" : "roll-up bug",
+    "wood louse(s)?" : "wood louse",
+    "shopping cart(s)?" : "shopping cart",
+    "shopping wagon(s)?" : "shopping wagon",
+    "grocery cart(s)?" : "grocery cart",
+    "shopping carriage(s)?" : "shopping carriage",
+    "super market trolley(s)?" : "supermarket trolley",
+    "kitty corner(s)?" : "kitty corner",
+    "kita corner(s)?" : "kitacorner",
+    "cater corner(s)?" : "catercorner",
+    "catty corner(s)?" : "cattycorner",
+    "kitty cross" : "kitty cross",
+    "kitty wampus" : "kitty wampus",
+    "[(do)|(did)|(done)|(doing)|(does)] donuts" : "doing donuts",
+    "[(do)|(did)|(done)|(doing)|(does)] cookies" : "doing cookies",
+    "[(whip)|(whipped)|(whips)|(whipping)] shitties" : "whipping shitties",
+    "sun shower(s)?" : "sunshower",
+    "wolf is giving birth" : "wolf is giving birth",
+    "devil is beating his wife" : "devil is beating his wife",
+    "monkey s wedding(s)?" : "monkey's wedding",
+    "fox s wedding(s)?" : "fox's wedding",
+    "pine apple rain" : "pineapple rain",
+    "liquid sun" : "liquid sun",
+    "goose bump(s)?" : "goosebumps",
+    "goose flesh" : "gooseflesh",
+    "goose pimple(s)?" : "goose pimples",
+    "chill bump(s)?" : "chill bumps",
+    "chill bug(s)?" : "chill bugs",
+    "chilly bump(s)?" : "chilly bumps",
+    "cold chill bump(s)?" : "cold-chill bumps",
+    "rotary" : "rotary",
+    "round about(s)?" : "roundabout",
+    "traffic circle(s)?" : "traffic circle",
+    "traffic circus(es)?" : "traffic circus",
+    "hair elastic(s)?" : "hair elastic",
+    "hair tie(s)?" : "hair tie",
+    "cruller(s)?" : "cruller",
+    "bear claw(s)?" : "bearclaw",
+    "cole slaw" : "coleslaw",
+    "^(?!cole slaw).*\\bslaw\\b" : "slaw",
+    "vinegar and oil" : "vinegar and oil",
+    "oil and vinegar" : "oil and vinegar",
+    "by accident" : "by accident",
+    "on accident" : "on accident",
+    "cut[ting]? the grass" : "cut the grass",
+    "cut[ting]? the lawn" : "cut the lawn",
+    "mow[(ed)|(ing)] the grass" : "mow the grass",
+    "mow[(ed)|(ing)] the lawn" : "mow the lawn",
+    "water bug(s)?" : "water bug",
+    "jesus bug(s)?" : "Jesus bug",
+    "water strider(s)?" : "waterstrider",
+    "back strider(s)?" : "backstrider",
+    "^(?!water strider)(?!back strider).*\\bstrider(s)?\\b" : "strider",
+    "water spider(s)?" : "water spider",
+    "water crawler(s)?" : "water crawler",
+    "water beetle(s)?" : "water beetle",
+    "skimmer(s)?" : "skimmer",
+    "^(?!water bubbler).*\\bbubbler(s)?\\b" : "bubbler",
+    "water bubbler(s)?" : "water bubbler",
+    "drinking fountain(s)?" : "drinking fountain",
+    "water fountain(s)?" : "water fountain",
+    "the subway" : "the subway",
+    "(the l)|(the el)" : "the L",
+    "the t" : "the T",
+    "the metro" : "the Metro",
+    "the bart" : "the BART",
+    "soda(s)?" : "soda",
+    "pop" : "pop",
+    "coke(s)?" : "coke",
+    "tonic(s)?" : "tonic",
+    "soft drink(s)?" : "soft drink",
+    "cocola(s)?" : "cocola",
+    "fizzy drink(s)?" : "fizzy drink",
+    "gate night(s)?" : "gate night",
+    "trick night(s)?" : "trick night",
+    "mischief night(s)?" : "mischief night",
+    "cabbage night(s)?" : "cabbage night",
+    "goosey night(s)?" : "goosey night",
+    "devil s night(s)?" : "devil's night",
+    "devil s eve(s)?" : "devil's eve",
+    "moot point(s)?" : "moot point",
+    "mute point(s)?" : "mute point",
+    "brew thru(s)?" : "brew thru",
+    "party barn(s)?" : "party barn",
+    "boot legger(s)?" : "bootlegger",
+    "beer barn(s)?" : "beer barn",
+    "beverage barn(s)?" : "beverage barn",
+    "carry out" : "carry-out",
+    "take out" : "take-out",
+    "ogl[e|es|ed|ing]" : "ogle",
+    "oogl[e|es|ed|ing]" : "oogle",
+    "oggl[e|es|ed|ing]" : "oggle",
+    "modals" : "modals", 
+}
+
+state_list = ["MA", "OR", "TX", "FL", "GA", "OH", "CO", "WA"]
+
+state_dict = {
+    "MA" : "Massachusetts",
+    "OR" : "Oregon",
+    "TX" : "Texas",
+    "FL" : "Florida",
+    "GA" : "Georgia",
+    "OH" : "Ohio",
+    "CO" : "Colorado",
+    "WA" : "Washington",
+}
+
 def count_regional_frequencies(features):
 
     regional_frequencies = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: 0)))
@@ -62,6 +256,7 @@ if __name__ == '__main__':
     features = pd.read_csv("features.csv")
 
     state_frequency = features["state"].value_counts()
+    print(state_frequency)
 
     missing_features = []
     feat_counts = {}
@@ -75,22 +270,27 @@ if __name__ == '__main__':
 
     print("missing features: ", len(missing_features))
 
-    regional_frequencies = count_regional_frequencies(features)
+    # regional_frequencies = count_regional_frequencies(features)
 
-    with open("frequencies.json", "w") as outfile:
-        json.dump(regional_frequencies, outfile, indent = 2)
+    # with open("frequencies.json", "w") as outfile:
+    #     json.dump(regional_frequencies, outfile, indent = 2)
 
-    # with open('frequencies.json', 'r') as handle:
-    #     regional_frequencies = json.load(handle)
+    with open('frequencies.json', 'r') as handle:
+        regional_frequencies = json.load(handle)
     
-    # for cluster_num in regional_frequencies:
-    #     for state in regional_frequencies[cluster_num]:
-    #         words = []
-    #         counts = []
-    #         for word in regional_frequencies[cluster_num][state]:
-    #             words.append(word)
-    #             counts.append(regional_frequencies[cluster_num][state][word])
-    #         plt.pie(counts, labels = words, autopct='%1.0f%%')
-    #         plt.savefig("plots/plot_" + str(cluster_num) + "_" + state + ".png")
+    for cluster_num in regional_frequencies:
+        for state in regional_frequencies[cluster_num]:
+            if state in state_list:
+                words = []
+                counts = []
+                for word in regional_frequencies[cluster_num][state]:
+                    if regional_frequencies[cluster_num][state][word] > 0:
+                        words.append(label_key[word])
+                        counts.append(regional_frequencies[cluster_num][state][word])
+                if len(words) > 0:
+                    f = plt.pie(counts, labels = words, autopct='%1.0f%%')
+                    plt.title(state_dict[state] + ", n = " + str(sum(counts)))
+                    plt.savefig("plots/plot_" + str(cluster_num) + "_" + state + ".png")
+                    plt.clf()
 
     # print(regional_frequencies)

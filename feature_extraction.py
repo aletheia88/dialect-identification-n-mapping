@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import csv
 
 words = [
     "mischievous",
@@ -15,7 +16,7 @@ words = [
     "yins",
     "you lot",
     "you guys",
-    "you uns"
+    "you uns",
     "y all",
     "tag sale(s)?",
     "yard sale(s)?",
@@ -138,7 +139,7 @@ words = [
     "water bug(s)?",
     "jesus bug(s)?",
     "water strider(s)?",
-    "back strider(s)?"
+    "back strider(s)?",
     "^(?!water strider)(?!back strider).*\\bstrider(s)?\\b",
     "water spider(s)?",
     "water crawler(s)?",
@@ -246,6 +247,8 @@ multiple_modals = [
     "would better",
 ]
 
+drug_exceptions = [53961, 73120, 75110, 101868]
+
 def build_regex():
     regex = {}  # key = string, value = regex
     for w in words:
@@ -264,21 +267,44 @@ def build_regex():
         giant_modal_regex += "(\\b" + m + "\\b)|"
     giant_modal_regex = giant_modal_regex[:-1]
     
-    print(giant_modal_regex)
-
     regex["modals"] = re.compile(giant_modal_regex)
     return regex
 
 
-# def features(text):
+def extract_features(feat_names, regex, text, i):
+    feats = []
+    for f in feat_names:
+        if re.search(regex[f], text):
+
+            # kludge to avoid having to do POS tagging on drug
+            if f == "drug": 
+                if i in drug_exceptions:
+                    feats.append(1)
+                    print(text)
+                else:
+                    feats.append(0)
+            
+            else: 
+                feats.append(1)
+
+        else:
+            feats.append(0)
+    return feats
+
 
 
 if __name__ == '__main__':
     regex = build_regex()
-    cols = regex.keys()
+    cols = ["state"] + list(regex.keys())
 
-    ensemble_data_path = 'ensemble.csv'
+    ensemble_data_path = 'ensemble2.csv'
     ensemble = pd.read_csv(ensemble_data_path)
-    print(ensemble["city"][0])
 
-
+    with open('features.csv', 'w') as csv_file:
+        csv_file = csv.writer(csv_file)
+        csv_file.writerow(cols)
+        for i in range(ensemble.shape[0]):
+            text = ensemble["text"][i]
+            features = extract_features(cols[1:], regex, text, i)
+            csv_file.writerow([ensemble["state"][i]] + features)
+            # if i % 1000 == 0: print(i)

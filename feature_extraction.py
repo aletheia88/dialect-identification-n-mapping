@@ -1,6 +1,7 @@
 import re
 import pandas as pd
 import csv
+import random
 
 words = [
     "mischievous",
@@ -291,6 +292,42 @@ def extract_features(feat_names, regex, text, i):
             feats.append(0)
     return feats
 
+def get_full_feature_set(ensemble, regex):
+    with open('features.csv', 'w') as csv_file:
+        csv_file = csv.writer(csv_file)
+        csv_file.writerow(cols)
+        for i in range(ensemble.shape[0]):
+            text = ensemble["text"][i]
+            features = extract_features(cols[1:], regex, text, i)
+            csv_file.writerow([ensemble["state"][i]] + features)
+
+def get_train_and_test_set(ensemble, regex, test_proportion = 0.1):
+    num_total_examples = ensemble.shape[0]
+    example_indices = list(range(num_total_examples))
+    random.shuffle(example_indices)
+    
+    num_test_examples = int(test_proportion*num_total_examples)
+    
+    test_indices = example_indices[:num_test_examples]
+    train_indices = example_indices[num_test_examples:]
+
+    # write training examples to file
+    with open('features_train.csv', 'w') as csv_file:
+        csv_file = csv.writer(csv_file)
+        csv_file.writerow(cols)
+        for i in train_indices:
+            text = ensemble["text"][i]
+            features = extract_features(cols[1:], regex, text, i)
+            csv_file.writerow([ensemble["state"][i]] + features)
+    
+    # write test examples to file
+    with open('features_test.csv', 'w') as csv_file:
+        csv_file = csv.writer(csv_file)
+        csv_file.writerow(cols)
+        for i in test_indices:
+            text = ensemble["text"][i]
+            features = extract_features(cols[1:], regex, text, i)
+            csv_file.writerow([ensemble["state"][i]] + features)
 
 
 if __name__ == '__main__':
@@ -300,11 +337,6 @@ if __name__ == '__main__':
     ensemble_data_path = 'ensemble2.csv'
     ensemble = pd.read_csv(ensemble_data_path)
 
-    with open('features.csv', 'w') as csv_file:
-        csv_file = csv.writer(csv_file)
-        csv_file.writerow(cols)
-        for i in range(ensemble.shape[0]):
-            text = ensemble["text"][i]
-            features = extract_features(cols[1:], regex, text, i)
-            csv_file.writerow([ensemble["state"][i]] + features)
-            # if i % 1000 == 0: print(i)
+    # get_full_feature_set(ensemble, regex)
+
+    get_train_and_test_set(ensemble, regex)

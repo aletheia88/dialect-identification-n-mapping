@@ -239,7 +239,7 @@ state_dict = {
     "WA" : "Washington",
 }
 
-def count_regional_frequencies(features):
+def count_regional_frequencies_clustered(features):
 
     regional_frequencies = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: 0)))
     
@@ -252,30 +252,28 @@ def count_regional_frequencies(features):
         if i % 1000 == 0: print(i)
     return regional_frequencies
 
-if __name__ == '__main__':
-    features = pd.read_csv("features.csv")
+def count_regional_frequencies_unclustered(features):
+    regional_frequencies = defaultdict(lambda : defaultdict(lambda : 0))
+    feat_list = list(features.columns)[1:]
 
-    state_frequency = features["state"].value_counts()
-    print(state_frequency)
+    for i in range(features.shape[0]):
+        state = features["state"][i]
+        for f in feat_list:
+            regional_frequencies[f][state] += int(features[f][i])
+    return regional_frequencies
 
-    missing_features = []
-    feat_counts = {}
-    for f in features.columns:
-        if f != "state":
-            if features[f].sum() == 0:
-                missing_features.append(f)
-            feat_counts[f] = features[f].sum()
-    
-    # print(feat_counts)
+def csv_to_frequency_json(input_csv_name, output_name, clustering = True):
+    features = pd.read_csv(input_csv_name)
+    if clustering:
+        regional_frequencies = count_regional_frequencies_clustered(features)
+    else:
+        regional_frequencies = count_regional_frequencies_unclustered(features)
 
-    print("missing features: ", len(missing_features))
+    with open(output_name, "w") as outfile:
+        json.dump(regional_frequencies, outfile, indent = 2)
 
-    # regional_frequencies = count_regional_frequencies(features)
-
-    # with open("frequencies.json", "w") as outfile:
-    #     json.dump(regional_frequencies, outfile, indent = 2)
-
-    with open('frequencies.json', 'r') as handle:
+def build_pie_charts(input_json_name):
+    with open(input_json_name, 'r') as handle:
         regional_frequencies = json.load(handle)
     
     for cluster_num in regional_frequencies:
@@ -289,8 +287,11 @@ if __name__ == '__main__':
                         counts.append(regional_frequencies[cluster_num][state][word])
                 if len(words) > 0:
                     f = plt.pie(counts, labels = words, autopct='%1.0f%%')
-                    plt.title(state_dict[state] + ", n = " + str(sum(counts)))
+                    plt.title("Yelp Data for " + state_dict[state] + ", n = " + str(sum(counts)))
                     plt.savefig("plots/plot_" + str(cluster_num) + "_" + state + ".png")
                     plt.clf()
 
-    # print(regional_frequencies)
+
+if __name__ == '__main__':
+    # get training frequencies
+    csv_to_frequency_json("features.csv", "frequencies_clustered.json", clustering = True)

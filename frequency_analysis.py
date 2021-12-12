@@ -2,6 +2,8 @@ from collections import defaultdict, Counter
 import pandas as pd
 import json
 from matplotlib import pyplot as plt
+import re
+import random
 
 word_clusters = [
     ["mischievous", "mischievious"],
@@ -10,12 +12,12 @@ word_clusters = [
     ["dragged", "drug"],
     ["you all", "(yous)|(youse)", "yins", "you lot", "you guys", "you uns", "y all"],
     ["tag sale(s)?", "yard sale(s)?", "garage sale(s)?", "rummage sale(s)?", "thrift sale(s)?", "stoop sale(s)?", "car port sale(s)?", "side walk sale(s)?", "jumble sale(s)?", "car boot sale(s)?", "patio sale(s)?"],
-    ["mumblety peg(s)?", "mumbledy peg(s)?", "mumbly peg(s)?", "mumblely peg(s)?", "mumble peg(s)?", "mummety peg(s)?", "numblety peg(s)?", "base ball jack knife", "stick knife", "stick frog(s)?", "stretch", "knifey", "splits"],
-    ["sub(s)?", "grinder(s)?", "hoagie(s)?", "po[or]? boy(s)?", "Italian sandwich(es)?", "sarney(s)?"],
+    ["mumblety peg(s)?", "mumbledy peg(s)?", "mumbly peg(s)?", "mumblely peg(s)?", "mumble peg(s)?", "mummety peg(s)?", "numblety peg(s)?", "base ball jack knife", "stick knife", "stick frog(s)?", "knifey"],
+    ["sub(s)?", "hoagie(s)?", "po[or]? boy(s)?", "Italian sandwich(es)?", "sarney(s)?"],
     ["fire fl(y|ies)", "lightning bug(s)?"],
     ["craw fish(es)?", "cray fish(es)?", "craw dad(s)?"],
     ["daddy long leg(s)?", "daddy big leg(s)?", "daddy bug(s)?", "father long leg(s)?", "daddy gray beard(s)?", "harvest man", "moskeet spider(s)?"],
-    ["grand mother(s)?", "granny(s)?", "grandma(s)?", "nana(s)?", "gramm[y|i](s)?", "gramma(s)?"],
+    ["grand mother(s)?", "grann[y|ie](s)?", "grandma(s)?", "nana(s)?", "gramm[y|i|ies](s)?", "gramma(s)?"],
     ["gramps", "grandpa(s)?", "grampa(s)?", "grand[d]?ad(s)?", "pap(s)?"],
     ["dust bunnies", "dust kittens", "dust mice", "dust balls"],
     ["sneaker(s)?", "gym shoe(s)?", "sand shoe(s)?", "jumper(s)?", "tennis shoe(s)?", "running shoe(s)?"],
@@ -35,7 +37,7 @@ word_clusters = [
     ["cut[ting]? the grass", "cut[ting]? the lawn", "mow[(ed)|(ing)] the grass", "mow[(ed)|(ing)] the lawn"],
     ["water bug(s)?", "jesus bug(s)?", "water strider(s)?", "back strider(s)?", "^(?!water strider)(?!back strider).*\\bstrider(s)?\\b", "water spider(s)?", "water crawler(s)?", "water beetle(s)?", "skimmer(s)?"],
     ["^(?!water bubbler).*\\bbubbler(s)?\\b", "water bubbler(s)?", "drinking fountain(s)?", "water fountain(s)?"],
-    ["the subway", "(the l)|(the el)", "the t", "the metro", "the bart"],
+    ["the subway", "the t", "the metro", "the bart"],
     ["soda(s)?", "pop", "coke(s)?", "tonic(s)?", "soft drink(s)?", "cocola(s)?", "fizzy drink(s)?"],
     ["gate night(s)?", "trick night(s)?", "mischief night(s)?", "cabbage night(s)?", "goosey night(s)?", "devil s night(s)?", "devil s eve(s)?"],
     ["moot point(s)?", "mute point(s)?"],
@@ -82,11 +84,9 @@ label_key = {
     "base ball jack knife" : "baseball jackknife",
     "stick knife" : "stickknife",
     "stick frog(s)?" : "stick frog",
-    "stretch" : "stretch",
     "knifey" : "knifey",
     "splits" : "splits",
     "sub(s)?" : "sub",
-    "grinder(s)?" : "grinder",
     "hoagie(s)?" : "hoagie",
     "po[or]? boy(s)?" : "poor boy",
     "Italian sandwich(es)?" : "Italian sandwich",
@@ -104,10 +104,10 @@ label_key = {
     "harvest man" : "harvestman",
     "moskeet spider(s)?" : "moskeet spider",
     "grand mother(s)?" : "grandmother",
-    "granny(s)?" : "granny",
+    "grann[y|ie](s)?" : "granny",
     "grandma(s)?" : "grandma",
     "nana(s)?" : "nana",
-    "gramm[y|i](s)?" : "grammy",
+    "gramm[y|i|ies](s)?" : "grammy",
     "gramma(s)?" : "gramma",
     "gramps" : "gramps",
     "grandpa(s)?" : "grandpa",
@@ -193,7 +193,6 @@ label_key = {
     "drinking fountain(s)?" : "drinking fountain",
     "water fountain(s)?" : "water fountain",
     "the subway" : "the subway",
-    "(the l)|(the el)" : "the L",
     "the t" : "the T",
     "the metro" : "the Metro",
     "the bart" : "the BART",
@@ -291,7 +290,189 @@ def build_pie_charts(input_json_name):
                     plt.savefig("plots/plot_" + str(cluster_num) + "_" + state + ".png")
                     plt.clf()
 
+def bootstrapping_trial(features, clusters):
+    n = features.shape[0]
+    
+    regional_frequencies = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: 0)))    
+    for iteration in range(n):
+        i = random.randint(0,n-1)
+        state = features["state"][i] 
+        for cluster_i, cluster in enumerate(clusters):
+            for w in cluster:
+                regional_frequencies[cluster_i][state][w] += int(features[w][i])
+
+    return regional_frequencies
+
+def bootstrapping(features, clusters, output_name):
+    totals = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: [])))
+
+    for i in range(40):
+        freqs = bootstrapping_trial(features, clusters)
+        for c in freqs:
+            for state in freqs[c]:
+                total = sum(freqs[c][state].values())
+                if total > 0:
+                    for word in freqs[c][state]:
+                        totals[c][state][word].append(freqs[c][state][word]/total)
+    
+    CI = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: [])))
+    for c in totals:
+        for state in totals[c]:
+            for word in totals[c][state]:
+                lst = totals[c][state][word]
+                lst.sort()
+                lower_bound = lst[2]
+                upper_bound = lst[-3]
+                CI[c][state][word] = [lower_bound, upper_bound]
+    
+    with open(output_name, "w") as outfile:
+        json.dump(CI, outfile, indent = 2)
+
+def frequencies_to_proportions(freqs):
+    proportions = defaultdict(lambda : defaultdict(lambda: defaultdict(lambda: 0)))
+    for c in freqs:
+        for state in freqs[c]:
+            total = sum(freqs[c][state].values())
+            if total > 0:
+                for word in freqs[c][state]:
+                    proportions[c][state][word] = freqs[c][state][word]/total
+    return proportions
+
+def format_table(yelp_fn, yelp_ci_fn, harvard_fn, cluster_index, feature_names, output_name):
+    with open(yelp_fn, 'r') as handle:
+        yelp = json.load(handle)
+
+    with open(yelp_ci_fn, 'r') as handle:
+        yelp_ci = json.load(handle)
+    
+    with open(harvard_fn, 'r') as handle:
+        harvard = json.load(handle)
+    
+    output = ""
+
+    # build header
+    output += "state\t"
+    for feat in feature_names:
+        output += feat + " Harvard\t" + "Yelp\t" + "Yelp CI\t"
+    output += "\n"
+    
+    # data for each state
+    for state in harvard[cluster_index]:
+        output += state + "\t"
+        
+        for f in feature_names:
+            harvard_proportion = harvard[cluster_index][state][f]
+            harvard_proportion = str(round(harvard_proportion, 2))
+
+            output += harvard_proportion + "\t"
+
+            yelp_proportion = yelp[cluster_index][state][f]
+            yelp_proportion = str(round(yelp_proportion, 2))
+
+            output += yelp_proportion + "\t"
+
+            yelp_ci_data = yelp_ci[cluster_index][state][f]
+            yelp_lower_bound = str(round(yelp_ci_data[0], 2))
+            yelp_upper_bound = str(round(yelp_ci_data[1], 2))
+
+            output += "[" + yelp_lower_bound + ", " + yelp_upper_bound + "]\t"
+
+
+        output += "\n"
+    
+    with open(output_name, "w") as handle:
+        handle.write(output)
+    
+
 
 if __name__ == '__main__':
     # get training frequencies
-    csv_to_frequency_json("features.csv", "frequencies_clustered.json", clustering = True)
+    # csv_to_frequency_json("features.csv", "frequencies_clustered.json", clustering = True)
+    # csv_to_frequency_json("features_train.csv", "frequencies_train_clustered.json", clustering = True)
+    # csv_to_frequency_json("features_train.csv", "frequencies_train_unclustered.json", clustering = False)
+
+    # clusters = [
+    #     ["realtor(s)?", "estate agent(s)?"],
+    #     ["you all", "(yous)|(youse)", "yins", "you lot", "you guys", "you uns", "y all"],
+    #     ["sub(s)?", "hoagie(s)?", "po[or]? boy(s)?", "Italian sandwich(es)?", "sarney(s)?"],
+    #     ["craw fish(es)?", "cray fish(es)?", "craw dad(s)?"],
+    #     ["grand mother(s)?", "grann[y|ie](s)?", "grandma(s)?", "nana(s)?", "gramm[y|i|ies](s)?", "gramma(s)?"],
+    #     ["sneaker(s)?", "gym shoe(s)?", "sand shoe(s)?", "jumper(s)?", "tennis shoe(s)?", "running shoe(s)?"],
+    #     ["cole slaw", "^(?!cole slaw).*\\bslaw\\b"],
+    #     ["by accident", "on accident"],
+    #     ["the subway", "the t", "the metro", "the bart"],
+    #     ["soda(s)?", "pop", "coke(s)?", "tonic(s)?", "soft drink(s)?", "cocola(s)?", "fizzy drink(s)?"],
+    #     ["carry out", "take out"],
+    # ]
+
+    # features_data_path = 'features.csv'
+    # features = pd.read_csv(features_data_path)
+
+    # bootstrapping(features, clusters, "confidence_intervals.json")
+
+    # with open("harvard_frequencies.json", 'r') as handle:
+    #     freqs = json.load(handle)
+    
+    # proportions = frequencies_to_proportions(freqs)
+
+    # with open("harvard_proportions.json", "w") as outfile:
+    #     json.dump(proportions, outfile, indent = 2)
+
+
+    # with open("frequencies_clustered.json", 'r') as handle:
+    #     freqs = json.load(handle)
+
+    # realtor
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                "1", ["realtor(s)?", "estate agent(s)?"],
+                "realtors.txt")
+    
+    # second person
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                "4", ["you all", "(yous)|(youse)", "yins", "you lot", "you guys", "you uns", "y all"],
+                "second_purpose.txt")
+    
+    # sandwich
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                "7", ["sub(s)?", "hoagie(s)?", "po[or]? boy(s)?", "Italian sandwich(es)?", "sarney(s)?"],
+                "sandwiches.txt")
+    
+    # crawfish
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                "9", ["craw fish(es)?", "cray fish(es)?", "craw dad(s)?"],
+                "crawfish.txt")
+
+    # grandmother table
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "11", ["grand mother(s)?", "grann[y|ie](s)?", "grandma(s)?", "nana(s)?", "gramm[y|i|ies](s)?", "gramma(s)?"],
+                 "grandmother.txt")
+    
+    # shoes
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "14", ["sneaker(s)?", "gym shoe(s)?", "sand shoe(s)?", "jumper(s)?", "tennis shoe(s)?", "running shoe(s)?"],
+                 "shoes.txt")
+    
+    # slaw
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "25", ["cole slaw", "^(?!cole slaw).*\\bslaw\\b"],
+                 "slaw.txt")
+    
+    # accident
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "27", ["by accident", "on accident"],
+                 "accident.txt")
+    
+    # trains
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "31", ["the subway", "the t", "the metro", "the bart"],
+                 "trains.txt")
+    
+    # drinks
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "32", ["soda(s)?", "pop", "coke(s)?", "tonic(s)?", "soft drink(s)?", "cocola(s)?", "fizzy drink(s)?"],
+                 "drinks.txt")
+
+    # togo
+    format_table("yelp_proportions.json", "confidence_intervals.json", "harvard_proportions.json", 
+                 "36", ["carry out", "take out"],
+                 "togo.txt")

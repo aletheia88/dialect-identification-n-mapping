@@ -40,11 +40,9 @@ words = [
     "base ball jack knife",
     "stick knife",
     "stick frog(s)?",
-    "stretch",
     "knifey",
     "splits",
     "sub(s)?",
-    "grinder(s)?",
     "hoagie(s)?",
     "po[or]? boy(s)?",
     "Italian sandwich(es)?",
@@ -62,10 +60,10 @@ words = [
     "harvest man",
     "moskeet spider(s)?",
     "grand mother(s)?",
-    "granny(s)?",
+    "grann[y|ie](s)?",
     "grandma(s)?",
     "nana(s)?",
-    "gramm[y|i](s)?",
+    "gramm[y|i|ies](s)?",
     "gramma(s)?",
     "gramps",
     "grandpa(s)?",
@@ -151,7 +149,6 @@ words = [
     "drinking fountain(s)?",
     "water fountain(s)?",
     "the subway",
-    "(the l)|(the el)",
     "the t",
     "the metro",
     "the bart",
@@ -248,7 +245,10 @@ multiple_modals = [
     "would better",
 ]
 
-drug_exceptions = [53961, 73120, 75110, 101868]
+drug_exceptions = [53246, 72190, 74122, 100459, 100464]
+pop_exceptions = [1946, 8205, 12021, 14198, 16311, 21037, 24302, 37443,
+                  46387, 52144, 54736, 62902, 73579, 80091, 85140, 92923,
+                  95743, 100037, 102119, 104400, 107827, 108923, 128692, 128939]
 
 def build_regex():
     regex = {}  # key = string, value = regex
@@ -258,9 +258,13 @@ def build_regex():
 
         # requiring that matched patterns be separate from other words
         if w[0] != "^":
-            reformatted_w = "\\b" + reformatted_w + "\\b"
+            reformatted_w = "\\b(" + reformatted_w + ")\\b"
         
-        regex[w] = re.compile(reformatted_w)
+        # everything but "the subway" is case-insensitive
+        if reformatted_w == "\\b(the subway)\\b":
+            regex[w] = re.compile(reformatted_w)
+        else:
+            regex[w] = re.compile(reformatted_w, flags = re.IGNORECASE)
 
     giant_modal_regex = ""
     for m in multiple_modals:
@@ -281,7 +285,13 @@ def extract_features(feat_names, regex, text, i):
             if f == "drug": 
                 if i in drug_exceptions:
                     feats.append(1)
-                    print(text)
+                else:
+                    feats.append(0)
+            
+            # kludge to avoid pos tagging on pop
+            elif f == "pop":
+                if i in pop_exceptions:
+                    feats.append(1)
                 else:
                     feats.append(0)
             
@@ -293,6 +303,8 @@ def extract_features(feat_names, regex, text, i):
     return feats
 
 def get_full_feature_set(ensemble, regex):
+    cols = ["state"] + list(regex.keys())
+
     with open('features.csv', 'w') as csv_file:
         csv_file = csv.writer(csv_file)
         csv_file.writerow(cols)
@@ -302,6 +314,8 @@ def get_full_feature_set(ensemble, regex):
             csv_file.writerow([ensemble["state"][i]] + features)
 
 def get_train_and_test_set(ensemble, regex, test_proportion = 0.1):
+    cols = ["state"] + list(regex.keys())
+
     num_total_examples = ensemble.shape[0]
     example_indices = list(range(num_total_examples))
     random.shuffle(example_indices)
@@ -332,11 +346,10 @@ def get_train_and_test_set(ensemble, regex, test_proportion = 0.1):
 
 if __name__ == '__main__':
     regex = build_regex()
-    cols = ["state"] + list(regex.keys())
-
-    ensemble_data_path = 'ensemble2.csv'
+    
+    ensemble_data_path = 'ensemble_no_duplicates.csv'
     ensemble = pd.read_csv(ensemble_data_path)
 
-    # get_full_feature_set(ensemble, regex)
+    get_full_feature_set(ensemble, regex)
 
     get_train_and_test_set(ensemble, regex)
